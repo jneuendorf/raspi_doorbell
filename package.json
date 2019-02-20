@@ -1,0 +1,12 @@
+{
+  "name": "raspi_doorbell",
+  "version": "0.0.1",
+  "description": "Attach your raspberry pi to your doorbell and get notified on your phone",
+  "main": "index.js",
+  "repository": "https://github.com/jneuendorf/raspi_doorbell.git",
+  "author": "Jim Neuendorf <jim.neuendorf@gmx.de>",
+  "license": "MIT",
+  "dependencies": {
+    "react-native-cli": "^2.0.1"
+  }
+}
