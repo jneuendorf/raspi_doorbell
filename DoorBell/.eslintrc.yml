@@ -1,0 +1,66 @@
+parser: "babel-eslint"
+env:
+    es6: true
+    browser: true
+    node: true
+parserOptions:
+    ecmaVersion: 6
+    ecmaFeatures:
+        jsx: true
+        experimentalObjectRestSpread: true
+    sourceType: module
+globals:
+    __DEV__: true
+    preval: true
+    afterAll: true
+    afterEach: true
+    beforeAll: true
+    beforeEach: true
+    describe: true
+    test: true
+    expect: true
+plugins:
+    - react
+    - import
+extends:
+    - plugin:import/recommended
+rules:
+    array-bracket-spacing: [error, never]
+    eol-last: off
+    jsx-quotes: warn
+    new-cap: off
+    no-debugger: warn
+    no-undef: error
+    no-underscore-dangle: off
+    no-unused-vars: [error, {vars: all, args: none, varsIgnorePattern: _+}]
+    no-use-before-define: off
+    no-warning-comments:
+        - warn
+        - terms: [TODO, FIXME, HACK, REVIEW, BUG, QUESTION, TEMP, XXX]
+          location: start
+    object-curly-spacing:  [error, never]
+    quotes: [error, single, {avoidEscape: true, allowTemplateLiterals: true}]
+    semi: [error, never]
+    strict: off
+    import/no-duplicates: error
+    import/no-named-as-default: off
+    react/jsx-boolean-value: off
+    react/jsx-no-undef: error
+    react/jsx-uses-react: warn
+    react/jsx-uses-vars: warn
+    react/jsx-no-bind: warn
+    react/no-did-mount-set-state: off
+    react/no-did-update-set-state: error
+    # only 1 stateful component (class)
+    react/no-multi-comp: [error, ignoreStateless: true]
+    react/no-string-refs: warn
+    react/no-unknown-property: warn
+    react/no-unused-state: warn
+    react/react-in-jsx-scope: warn
+    react/self-closing-comp: warn
+settings:
+    import/resolver:
+        # eslint-import-resolver-node
+        node: {}
+        /Users/jimneuendorf/Developer/emma-blossom/1179_budde_native_app/budde_inside_app/eslint_import_resolver_babel_alias: {}
+        # eslint_import_resolver_babel_alias: {}

@@ -1,0 +1,11 @@
+{
+    "request_volume": "volume:request",
+    "requestVolume": "volume:request",
+    "receive_volume": "volume:receive",
+    "receiveVolume": "volume:receive",
+    "update_volume": "volume:update",
+    "updateVolume": "volume:update",
+
+    "receive_bell": "bell:receive",
+    "receiveBell": "bell:receive"
+}

@@ -1,10 +1,16 @@
 # import RPi.GPIO as GPIO
 import asyncio
+import json
 import pygame
 import tornado.gen
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
+
+
+with open('../DoorBell/websocket-message-types.json') as file:
+    message_types = json.load(file)
+    print(message_types)
 
 
 class MainHandler(tornado.web.RequestHandler):
@@ -15,18 +21,31 @@ class MainHandler(tornado.web.RequestHandler):
 connections = set()
 
 
-class SimpleWebSocket(tornado.websocket.WebSocketHandler):
+class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
     def open(self):
         print("got a connection...")
         connections.add(self)
 
     def on_message(self, message):
-        print('new volume =', message)
-        pygame.mixer.music.set_volume(float(message))
-        for client in connections:
-            if client is not self:
-                client.write_message(f'{{"volume": {message}}}')
+        message = json.loads(message)
+        print('message', message)
+        message_type = message['type']
+        if message_type == message_types['request_volume']:
+            self.write_message(json.dumps({
+                "type": message_types['receive_volume'],
+                "volume": pygame.mixer.music.get_volume(),
+            }))
+        elif message_type == message_types['update_volume']:
+            new_volume = message['volume']
+            # print('new volume =', new_volume)
+            pygame.mixer.music.set_volume(float(new_volume))
+            for client in connections:
+                if client is not self:
+                    client.write_message(json.dumps({
+                        "type": message_types['receive_volume'],
+                        "volume": new_volume,
+                    }))
 
     def on_close(self):
         connections.remove(self)
@@ -35,7 +54,7 @@ class SimpleWebSocket(tornado.websocket.WebSocketHandler):
 def make_app():
     return tornado.web.Application([
         (r"/", MainHandler),
-        (r"/websocket", SimpleWebSocket),
+        (r"/websocket", WebSocketHandler),
     ])
 
 
@@ -58,10 +77,11 @@ async def play_sound():
 
 async def handle_ring():
     print("bell is ringing!")
-    # play_sound()
-    await play_sound()
     for client in connections:
-        client.write_message("someone's at the door!")
+        client.write_message(json.dumps({
+            'type': message_types['receive_bell'],
+        }))
+    await play_sound()
 
 
 async def gpio_loop():
@@ -73,7 +93,6 @@ async def gpio_loop():
 
 async def gpio_test_loop():
     while True:
-        # print("bell is ringing!")
         timer = tornado.gen.sleep(10.000)
         await handle_ring()
         await timer
@@ -90,6 +109,7 @@ async def main():
         gpio_test_loop(),
         start_websocket_server(),
     )
+
 
 if __name__ == "__main__":
     asyncio.run(main())

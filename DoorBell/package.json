@@ -1,23 +1,31 @@
 {
-  "name": "DoorBell",
-  "version": "0.0.1",
-  "private": true,
-  "scripts": {
-    "start": "node node_modules/react-native/local-cli/cli.js start",
-    "test": "jest"
-  },
-  "dependencies": {
-    "react": "16.6.3",
-    "react-native": "0.58.5"
-  },
-  "devDependencies": {
-    "babel-core": "^7.0.0-bridge.0",
-    "babel-jest": "24.1.0",
-    "jest": "24.1.0",
-    "metro-react-native-babel-preset": "0.52.0",
-    "react-test-renderer": "16.6.3"
-  },
-  "jest": {
-    "preset": "react-native"
-  }
+    "name": "DoorBell",
+    "version": "0.0.1",
+    "private": true,
+    "scripts": {
+        "start": "node node_modules/react-native/local-cli/cli.js start",
+        "ios": "npx react-native run-ios",
+        "test": "jest"
+    },
+    "dependencies": {
+        "react": "16.6.3",
+        "react-native": "0.58.5"
+    },
+    "devDependencies": {
+        "babel-core": "^7.0.0-bridge.0",
+        "babel-eslint": "^8.2.3",
+        "babel-jest": "24.1.0",
+        "eslint": "^4.19.1",
+        "eslint-plugin-import": "^2.12.0",
+        "eslint-plugin-react": "^7.8.2",
+        "generator-rn-toolbox": "^3.8.0",
+        "jest": "24.1.0",
+        "metro-react-native-babel-preset": "0.52.0",
+        "react-native-cli": "^2.0.1",
+        "react-test-renderer": "16.6.3",
+        "yo": "^2.0.5"
+    },
+    "jest": {
+        "preset": "react-native"
+    }
 }
