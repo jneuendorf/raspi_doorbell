@@ -2,8 +2,6 @@
 import asyncio
 import json
 import pygame
-import tornado.gen
-import tornado.ioloop
 import tornado.web
 import tornado.websocket
 
@@ -11,11 +9,6 @@ import tornado.websocket
 with open('../DoorBell/websocket-message-types.json') as file:
     message_types = json.load(file)
     print(message_types)
-
-
-class MainHandler(tornado.web.RequestHandler):
-    def get(self):
-        self.render("index.html")
 
 
 connections = set()
@@ -32,28 +25,37 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         print('message', message)
         message_type = message['type']
         if message_type == message_types['request_volume']:
-            self.write_message(json.dumps({
+            self.write_message({
                 "type": message_types['receive_volume'],
                 "volume": pygame.mixer.music.get_volume(),
-            }))
+            })
         elif message_type == message_types['update_volume']:
             new_volume = message['volume']
             # print('new volume =', new_volume)
-            pygame.mixer.music.set_volume(float(new_volume))
+            pygame.mixer.music.set_volume(new_volume)
             for client in connections:
                 if client is not self:
-                    client.write_message(json.dumps({
+                    client.write_message({
                         "type": message_types['receive_volume'],
                         "volume": new_volume,
-                    }))
+                    })
 
     def on_close(self):
         connections.remove(self)
 
+    # @override
+    def write_message(self, message):
+        super().write_message(json.dumps(message))
+
+
+# class MainHandler(tornado.web.RequestHandler):
+#     def get(self):
+#         self.render("index.html")
+
 
 def make_app():
     return tornado.web.Application([
-        (r"/", MainHandler),
+        # (r"/", MainHandler),
         (r"/websocket", WebSocketHandler),
     ])
 
@@ -72,15 +74,15 @@ pygame.mixer.music.set_volume(1.0)
 async def play_sound():
     pygame.mixer.music.play()
     # Estimated duration of MP3 file.
-    await tornado.gen.sleep(1.8)
+    await asyncio.sleep(1.8)
 
 
 async def handle_ring():
     print("bell is ringing!")
     for client in connections:
-        client.write_message(json.dumps({
+        client.write_message({
             'type': message_types['receive_bell'],
-        }))
+        })
     await play_sound()
 
 
@@ -88,12 +90,12 @@ async def gpio_loop():
     while True:
         if not GPIO.input(BUTTON):
             handle_ring()
-        await tornado.gen.sleep(0.150)
+        await asyncio.sleep(0.150)
 
 
 async def gpio_test_loop():
     while True:
-        timer = tornado.gen.sleep(10.000)
+        timer = asyncio.sleep(10.000)
         await handle_ring()
         await timer
 
@@ -101,7 +103,8 @@ async def gpio_test_loop():
 async def start_websocket_server():
     app = make_app()
     app.listen(8888)
-    # No need to start tornado's loop because we already have our own.
+    # No need to start tornado's ioloop
+    # because we already have our own (asyncio).
 
 
 async def main():
