@@ -2,8 +2,13 @@
 import asyncio
 import json
 import pygame
+import sys
 import tornado.web
 import tornado.websocket
+
+
+if sys.version_info[0:2] != (3, 5):
+    raise RuntimeError('Python 3.5 required but got ' + sys.version)
 
 
 with open('../DoorBell/websocket-message-types.json') as file:
@@ -67,7 +72,7 @@ def make_app():
 
 
 pygame.mixer.init()
-pygame.mixer.music.load('DBSE.mp3')
+pygame.mixer.music.load('DBSE.ogg')
 pygame.mixer.music.set_volume(1.0)
 
 
@@ -107,12 +112,19 @@ async def start_websocket_server():
     # because we already have our own (asyncio).
 
 
-async def main():
-    await asyncio.gather(
-        gpio_test_loop(),
-        start_websocket_server(),
-    )
-
-
 if __name__ == "__main__":
-    asyncio.run(main())
+    # Python 3.5
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(
+        asyncio.gather(
+            gpio_test_loop(),
+            start_websocket_server(),
+        )
+    )
+    loop.close()
+
+    # Python 3.7+
+    # asyncio.run(asyncio.gather(
+    #     gpio_test_loop(),
+    #     start_websocket_server(),
+    # ))
