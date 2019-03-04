@@ -11,9 +11,12 @@ if sys.version_info[0:2] != (3, 5):
     raise RuntimeError('Python 3.5 required but got ' + sys.version)
 
 
-with open('../DoorBell/websocket-message-types.json') as file:
+with open('../websocket-message-types.json') as file:
     message_types = json.load(file)
     print(message_types)
+with open('../server-config.json') as file:
+    server_config = json.load(file)
+    print(server_config)
 
 
 connections = set()
@@ -107,7 +110,7 @@ async def gpio_test_loop():
 
 async def start_websocket_server():
     app = make_app()
-    app.listen(8888)
+    app.listen(server_config['port'])
     # No need to start tornado's ioloop
     # because we already have our own (asyncio).
 
