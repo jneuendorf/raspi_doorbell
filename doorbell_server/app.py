@@ -1,4 +1,4 @@
-# import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 import asyncio
 import json
 import pygame
@@ -68,15 +68,15 @@ def make_app():
     ])
 
 
-# # GPIO SETUP
-# GPIO.setmode(GPIO.BCM)
-# BUTTON = 21
-# GPIO.setup(BUTTON, GPIO.IN)
+# GPIO SETUP
+GPIO.setmode(GPIO.BCM)
+BUTTON = 21
+GPIO.setup(BUTTON, GPIO.IN)
 
 
 pygame.mixer.init()
 pygame.mixer.music.load('DBSE.ogg')
-pygame.mixer.music.set_volume(1.0)
+pygame.mixer.music.set_volume(0.3)
 
 
 async def play_sound():
@@ -120,7 +120,7 @@ if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     loop.run_until_complete(
         asyncio.gather(
-            gpio_test_loop(),
+            gpio_loop(),
             start_websocket_server(),
         )
     )
