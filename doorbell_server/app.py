@@ -128,6 +128,7 @@ if __name__ == "__main__":
 
     # Cleanup handler, e.g. for when Ctrl+C is pressed.
     def cleanup(sig, frame):
+        loop.stop()
         loop.close()
         pygame.mixer.quit()
         GPIO.cleanup()
