@@ -72,6 +72,7 @@ def make_app():
 GPIO.setmode(GPIO.BCM)
 BUTTON = 21
 GPIO.setup(BUTTON, GPIO.IN)
+GPIO.add_event_detect(BUTTON, GPIO.FALLING)
 
 
 pygame.mixer.init()
@@ -96,9 +97,12 @@ async def handle_ring():
 
 async def gpio_loop():
     while True:
-        if not GPIO.input(BUTTON):
+        # See https://sourceforge.net/p/raspberry-gpio-python/wiki/Inputs/
+        if GPIO.event_detected(BUTTON):
             handle_ring()
-        await asyncio.sleep(0.150)
+        # if not GPIO.input(BUTTON):
+        #     handle_ring()
+        await asyncio.sleep(0.200)
 
 
 async def gpio_test_loop():
