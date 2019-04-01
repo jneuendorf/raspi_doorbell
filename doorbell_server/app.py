@@ -127,7 +127,7 @@ if __name__ == "__main__":
     loop = asyncio.get_event_loop()
 
     # Cleanup handler, e.g. for when Ctrl+C is pressed.
-    def cleanup():
+    def cleanup(sig, frame):
         loop.close()
         pygame.mixer.quit()
         GPIO.cleanup()
