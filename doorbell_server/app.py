@@ -125,9 +125,14 @@ async def start_websocket_server():
 if __name__ == "__main__":
     # Python 3.5
     loop = asyncio.get_event_loop()
+    future = asyncio.gather(
+        gpio_loop(),
+        start_websocket_server(),
+    )
 
     # Cleanup handler, e.g. for when Ctrl+C is pressed.
     def cleanup(sig, frame):
+        future.cancel()
         loop.stop()
         loop.close()
         pygame.mixer.quit()
@@ -136,12 +141,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, cleanup)
     signal.signal(signal.SIGTERM, cleanup)
 
-    loop.run_until_complete(
-        asyncio.gather(
-            gpio_loop(),
-            start_websocket_server(),
-        )
-    )
+    loop.run_until_complete(future)
     loop.close()
 
     # Python 3.7+
