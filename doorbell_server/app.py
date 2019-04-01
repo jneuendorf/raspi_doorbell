@@ -2,6 +2,7 @@ import RPi.GPIO as GPIO
 import asyncio
 import json
 import pygame
+import signal
 import sys
 import tornado.web
 import tornado.websocket
@@ -119,9 +120,21 @@ async def start_websocket_server():
     # because we already have our own (asyncio).
 
 
+###############################################################################
+# MAIN PROGRAM
 if __name__ == "__main__":
     # Python 3.5
     loop = asyncio.get_event_loop()
+
+    # Cleanup handler, e.g. for when Ctrl+C is pressed.
+    def cleanup():
+        loop.close()
+        pygame.mixer.quit()
+        GPIO.cleanup()
+
+    signal.signal(signal.SIGINT, cleanup)
+    signal.signal(signal.SIGTERM, cleanup)
+
     loop.run_until_complete(
         asyncio.gather(
             gpio_loop(),
