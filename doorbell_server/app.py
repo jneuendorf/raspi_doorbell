@@ -69,36 +69,21 @@ def make_app():
     ])
 
 
-async def play_sound():
-    pygame.mixer.music.play()
-    # Estimated duration of MP3 file.
-    await asyncio.sleep(1.8)
-
-
-async def handle_ring():
+def handle_ring(channel):
     print("bell is ringing!")
     for client in connections:
         client.write_message({
             'type': message_types['receive_bell'],
         })
-    await play_sound()
+    pygame.mixer.music.play()
 
 
 async def gpio_loop():
     while True:
         # See https://sourceforge.net/p/raspberry-gpio-python/wiki/Inputs/
-        if GPIO.event_detected(BUTTON):
-            await handle_ring()
-        # if not GPIO.input(BUTTON):
+        # if GPIO.event_detected(BUTTON):
         #     await handle_ring()
         await asyncio.sleep(0.200)
-
-
-# async def gpio_test_loop():
-#     while True:
-#         timer = asyncio.sleep(10.000)
-#         await handle_ring()
-#         await timer
 
 
 async def start_websocket_server():
@@ -116,7 +101,7 @@ GPIO.setmode(GPIO.BCM)
 BUTTON = 21
 GPIO.setup(BUTTON, GPIO.IN)
 GPIO.add_event_detect(BUTTON, GPIO.FALLING,
-                      callback=handle_ring, bouncetime=200)
+                      callback=handle_ring, bouncetime=5000)
 
 # SETUP SOUND PLAYBACK LIB
 pygame.mixer.init()
@@ -128,7 +113,7 @@ if __name__ == "__main__":
     # Python 3.5
     loop = asyncio.get_event_loop()
     future = asyncio.gather(
-        # gpio_loop(),
+        gpio_loop(),
         start_websocket_server(),
     )
 
@@ -148,6 +133,6 @@ if __name__ == "__main__":
 
     # Python 3.7+
     # asyncio.run(asyncio.gather(
-    #     gpio_test_loop(),
+    #     gpio_loop(),
     #     start_websocket_server(),
     # ))
