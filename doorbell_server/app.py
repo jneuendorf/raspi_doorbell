@@ -69,9 +69,6 @@ pygame.mixer.music.load('DBSE.ogg')
 pygame.mixer.music.set_volume(0.6)
 
 
-RECIPIENTS = ['jim.neuendorf@gmx.de', 'visel@gmx.net']
-
-
 with open('../websocket-message-types.json') as file:
     message_types = json.load(file)
     logger.info(message_types)
