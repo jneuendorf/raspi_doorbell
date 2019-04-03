@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+pkill --pidfile doorbell.pid
+echo '' > doorbell.pid
