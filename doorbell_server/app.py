@@ -90,11 +90,12 @@ if __name__ == "__main__":
 
     # Cleanup handler, e.g. for when Ctrl+C is pressed.
     def cleanup(sig, frame):
-        future.cancel()
-        loop.stop()
-        loop.close()
         pygame.mixer.quit()
         GPIO.cleanup()
+        # As of https://docs.python.org/3.5/library/asyncio-eventloop.html#asyncio.AbstractEventLoop.stop
+        # 'stop' only affects 'loop.run_forever' but not 'loop.run_until_complete'.
+        # Thus we just cancel the Future object.
+        future.cancel()
 
     signal.signal(signal.SIGINT, cleanup)
     signal.signal(signal.SIGTERM, cleanup)
