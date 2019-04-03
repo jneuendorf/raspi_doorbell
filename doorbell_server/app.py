@@ -1,4 +1,5 @@
 import asyncio
+from concurrent.futures import CancelledError
 import json
 import logging
 import signal
@@ -81,24 +82,32 @@ with open('../server-config.json') as file:
 # MAIN PROGRAM
 
 if __name__ == "__main__":
-    # Python 3.5
     loop = asyncio.get_event_loop()
     future = asyncio.gather(
         gpio_loop(),
         start_server(),
     )
 
+    cleaning_up = False
+
     # Cleanup handler, e.g. for when Ctrl+C is pressed.
     def cleanup(sig, frame):
+        cleaning_up = True
+
         pygame.mixer.quit()
         GPIO.cleanup()
-        # As of https://docs.python.org/3.5/library/asyncio-eventloop.html#asyncio.AbstractEventLoop.stop
-        # 'stop' only affects 'loop.run_forever' but not 'loop.run_until_complete'.
-        # Thus we just cancel the Future object.
+        # 'stop' only affects 'loop.run_forever' but not
+        # 'loop.run_until_complete'. Thus we just cancel the Future object.
+        # See https://docs.python.org/3.5/library/asyncio-eventloop.html#asyncio.AbstractEventLoop.stop
         future.cancel()
 
     signal.signal(signal.SIGINT, cleanup)
     signal.signal(signal.SIGTERM, cleanup)
 
-    loop.run_until_complete(future)
-    loop.close()
+    try:
+        loop.run_until_complete(future)
+    except CancelledError as e:
+        if not cleaning_up:
+            logger.error(str(e))
+    finally:
+        loop.close()
