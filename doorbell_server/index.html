@@ -9,6 +9,14 @@
 <script type="text/javascript">
     let volume, websocket
 
+    const slider = document.querySelector('input[type="range"]')
+    slider.addEventListener('change', event => {
+        websocket.send(JSON.stringify({
+            type: messageTypes.updateVolume,
+            volume: event.target.value
+        }))
+    })
+
     const messageTypes = {
         "request_volume": "volume:request",
         "requestVolume": "volume:request",
@@ -34,7 +42,7 @@
             const {type, ...payload} = message
             if (type === messageTypes.receiveVolume) {
                 volume = payload.volume
-                document.querySelector('input[type="range"]').value = volume
+                slider.value = volume
             }
             /* else if (type === messageTypes.receiveBell) {
                 alert('Ring')
@@ -42,11 +50,7 @@
         }
     }
 
-    const setVolume = () => {
-        websocket.send(JSON.stringify({type: messageTypes.updateVolume, volume}))
-    }
-
-    websocket = new WebSocket('ws://localhost:8888/websocket')
+    websocket = new WebSocket('ws://192.168.2.169:8888/websocket')
     websocket.onopen = () => {
         websocket.send(JSON.stringify({type: messageTypes.requestVolume}))
     }
@@ -67,7 +71,7 @@
         type='range'
         min='0'
         max='1'
-        onchange='setVolume(this.value)'
+        step='any'
     />
 </div>
 
