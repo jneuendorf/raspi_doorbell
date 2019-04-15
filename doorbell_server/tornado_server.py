@@ -7,6 +7,7 @@ import tornado.websocket
 
 connections = set()
 logger = logging.getLogger("doorbell")
+message_types = {}
 
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
@@ -48,7 +49,9 @@ class MainHandler(tornado.web.RequestHandler):
         self.render("index.html")
 
 
-def start(port):
+def start(port, _message_types):
+    global message_types
+    message_types = _message_types
     app = tornado.web.Application([
         (r"/", MainHandler),
         (r"/websocket", WebSocketHandler),

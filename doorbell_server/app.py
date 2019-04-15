@@ -37,7 +37,7 @@ async def gpio_loop():
 
 
 async def start_server():
-    tornado_server.start(server_config['port'])
+    tornado_server.start(server_config['port'], message_types)
 
 ###############################################################################
 # SETUP
