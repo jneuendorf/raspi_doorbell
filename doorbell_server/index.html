@@ -72,7 +72,7 @@
     slider.addEventListener('change', event => {
         websocket.send(JSON.stringify({
             type: messageTypes.updateVolume,
-            volume: event.target.value
+            volume: parseFloat(event.target.value),
         }))
     })
 </script>
