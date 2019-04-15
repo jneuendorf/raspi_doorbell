@@ -40,14 +40,14 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         super().write_message(json.dumps(message))
 
 
-# class MainHandler(tornado.web.RequestHandler):
-#     def get(self):
-#         self.render("index.html")
+class MainHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.render("index.html")
 
 
 def start(port):
     app = tornado.web.Application([
-        # (r"/", MainHandler),
+        (r"/", MainHandler),
         (r"/websocket", WebSocketHandler),
     ])
     app.listen(port)
