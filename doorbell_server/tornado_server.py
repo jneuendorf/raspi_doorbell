@@ -1,9 +1,12 @@
+import json
+import logging
 import pygame
 import tornado.web
 import tornado.websocket
 
 
 connections = set()
+logger = logging.getLogger("doorbell")
 
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
@@ -49,5 +52,6 @@ def start(port):
     app = tornado.web.Application([
         (r"/", MainHandler),
         (r"/websocket", WebSocketHandler),
+        # static_path='static',
     ])
     app.listen(port)
