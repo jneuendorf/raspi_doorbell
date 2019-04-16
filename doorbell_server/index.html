@@ -2,7 +2,38 @@
 <html lang="en" dir="ltr">
 <head>
     <meta charset="utf-8">
-    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Raspi Doorbell</title>
+    <style type="text/css">
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            max-width: 500px;
+            height: 15px;
+            border-radius: 5px;
+            background: #d3d3d3;
+            outline: none;
+            margin: 10px 0;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #4CAF50;
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #4CAF50;
+            cursor: pointer;
+        }
+        </style>
 </head>
 <body>
 
@@ -57,9 +88,10 @@
     }
 </script>
 
-<div>
-    <span>Volume</span>
+<div style="margin: 0 auto;">
+    <span>Volume</span><br>
     <input
+        class='slider'
         type='range'
         min='0'
         max='1'
@@ -68,7 +100,7 @@
 </div>
 
 <script type="text/javascript">
-    slider = document.querySelector('input[type="range"]')
+    slider = document.querySelector('.slider')
     slider.addEventListener('change', event => {
         websocket.send(JSON.stringify({
             type: messageTypes.updateVolume,
