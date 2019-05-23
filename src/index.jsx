@@ -184,8 +184,8 @@ export default class App extends React.PureComponent {
             style={styles.container}
         >
             <TouchableWithoutFeedback onPress={this.hideKeyboard}>
-                <View style={styles.logoSection}>
-                    <Image
+                <div style={styles.logoSection}>
+                    <img
                         source={
                             isConnected
                             ? require(`./assets/icon_small_active.png`)
@@ -193,11 +193,11 @@ export default class App extends React.PureComponent {
                         }
                         style={styles.logo}
                     />
-                </View>
+                </div>
             </TouchableWithoutFeedback>
 
-            <View style={styles.section}>
-                <Text>Host</Text>
+            <div style={styles.section}>
+                <label>Host</label>
                 <TextInput
                     ref={this.setInputRef}
                     returnKeyType="go"
@@ -226,7 +226,7 @@ export default class App extends React.PureComponent {
                         onPress={this.tryConnecting}
                     />
                 }
-            </View>
+            </div>
 
             <TouchableWithoutFeedback onPress={this.hideKeyboard}>
                 <View style={styles.section}>

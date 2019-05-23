@@ -1,1 +1,5 @@
+__pycache__
+*.log
+node_modules
 server-config.json
+venv
