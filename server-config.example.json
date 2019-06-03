@@ -5,6 +5,12 @@
         "addr_from": "my.name@gmx.de",
         "smtp_server": "mail.gmx.net",
         "smtp_user": "my.name@gmx.de",
-        "smtp_pass": "my.password"
-    }
+        "smtp_pass": "my.password",
+        "max_volume": 0.05,
+    },
+    "do_not_disturb_mode": {
+        "begin": [19, 30],
+        "end": [7, 30]
+    },
+    "audio_file": "DBSE.ogg"
 }

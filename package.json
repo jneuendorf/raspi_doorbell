@@ -5,10 +5,13 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
+    "rc-slider": "^8.6.11",
     "react": "^16.8.6",
-    "react-dom": "^16.8.6"
+    "react-dom": "^16.8.6",
+    "react-switch": "^5.0.0"
   },
   "devDependencies": {
+    "parcel-bundler": "^1.12.3",
     "webpack": "^4.30.0",
     "webpack-cli": "^3.3.0"
   }

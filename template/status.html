@@ -4,6 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Raspi Doorbell</title>
+    <link rel="stylesheet" href="/static/vendor/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/vendor/bootstrap-toggle.min.css">
+    <script src="/static/vendor/jquery-3.4.1.min.js" charset="utf-8"></script>
+    <script src="/static/vendor/bootstrap-toggle.min.js" charset="utf-8"></script>
     <style type="text/css">
         .slider {
             -webkit-appearance: none;
@@ -33,9 +37,11 @@
             background: #4CAF50;
             cursor: pointer;
         }
-        </style>
+    </style>
 </head>
 <body>
+
+
 
 <script type="text/javascript">
     let volume, websocket, slider
@@ -91,13 +97,32 @@
 <div style="margin: 0 auto;">
     <span>Volume</span><br>
     <input
-        class='slider'
-        type='range'
-        min='0'
-        max='1'
-        step='any'
-    />
+        class="slider"
+        type="range"
+        min="0"
+        max="1"
+        step="any"
+        value="{{volume}}"
+    >
 </div>
+
+
+<!-- bootstrap-toggle -->
+<div class="checkbox disabled">
+    <label>
+        <input
+            type="checkbox"
+            data-toggle="toggle"
+            disabled
+            {% if do_not_disturb_mode_is_on %}
+                checked
+            {% end %}
+        >
+        Nicht stören
+    </label>
+</div>
+
+<script src="/static/status.js" type="module"></script>
 
 <script type="text/javascript">
     slider = document.querySelector('.slider')
@@ -108,6 +133,8 @@
         }))
     })
 </script>
+
+<button type="button">Neu starten</button>
 
 </body>
 </html>

@@ -1,8 +1,13 @@
 import json
 import logging
+import os
+
 import pygame
 import tornado.web
 import tornado.websocket
+
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 connections = set()
@@ -27,7 +32,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             })
         elif message_type == message_types['update_volume']:
             new_volume = message['volume']
-            # logger.info('new volume =', new_volume)
+            logger.info('new volume =', new_volume)
             pygame.mixer.music.set_volume(new_volume)
             for client in connections:
                 if client is not self:
@@ -44,17 +49,38 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         super().write_message(json.dumps(message))
 
 
-class MainHandler(tornado.web.RequestHandler):
+class StatusHandler(tornado.web.RequestHandler):
     def get(self):
-        self.render("index.html")
+        self.render(
+            os.path.join(BASE_DIR, "template/status2.html"),
+            # template context
+            bell_log=self._get_logs(),
+            do_not_disturb_mode_is_on=False,
+            pid_file_exists=True,
+            # TODO: localhost <=> debug
+            # websocket_url="ws://192.168.2.169:8888/websocket",
+            websocket_url="ws://localhost:8888/websocket",
+        )
+
+    def _get_logs(self, limit=40):
+        try:
+            with open(os.path.join(BASE_DIR, "app.log")) as file:
+                lines = file.readlines()
+        except OSError:
+            lines = []
+        return reversed(lines[:-limit])
 
 
 def start(port, _message_types):
     global message_types
     message_types = _message_types
-    app = tornado.web.Application([
-        (r"/", MainHandler),
-        (r"/websocket", WebSocketHandler),
-        # static_path='static',
-    ])
+    app = tornado.web.Application(
+        [
+            (r"/status", StatusHandler),
+            (r"/websocket", WebSocketHandler),
+        ],
+        static_path=os.path.join(BASE_DIR, 'static'),
+        static_url_prefix='/static/',
+    )
     app.listen(port)
+    print(app, port, message_types)
