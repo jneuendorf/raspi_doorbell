@@ -1,6 +1,5 @@
 import asyncio
 from concurrent.futures import CancelledError
-from datetime import datetime, time
 import json
 import logging
 import logging.config
@@ -19,30 +18,27 @@ import pygame
 import notifications
 import tornado_server
 import utils
+from server_config import ServerConfig
+import local_config
 
 
 class App:
-    DEFAULT_SERVER_CONFIG = {
-        'notifications': {
-            'max_volume': 0.05,
-        },
-        'do_not_disturb_mode': {
-            'begin': [19, 30],
-            'end': [7, 30]
-        },
-        'audio_file': 'DBSE.ogg',
-    }
-
     logger = None
     server_config = None
-    message_types = None
+    message_types = {
+        "request_volume": "volume:request",
+        "receive_volume": "volume:receive",
+        "update_volume": "volume:update",
+        "receive_bell": "bell:receive",
+    }
+
     cleaning_up = False
     future = None
 
     def __init__(self, debug=False):
         self.debug = debug
         self.init_logger()
-        self.load_configs()
+        self.load_config()
         self.init_mixer()
         self.init_gpio()
 
@@ -111,34 +107,21 @@ class App:
 
         self.logger = logger
 
-    def load_configs(self):
-        with open('websocket-message-types.json') as file:
-            self.message_types = json.load(file)
-            self.logger.info(self.message_types)
-        with open('server-config.json') as file:
-            server_config = json.load(file)
-            self.server_config = {
-                **self.DEFAULT_SERVER_CONFIG,
-                **server_config,
-                # Deep merge some deep dicts.
-                'notifications': {
-                    **self.DEFAULT_SERVER_CONFIG['notifications'],
-                    **server_config['notifications'],
-                },
-            }
-            sanitized_config = {
-                **self.server_config,
-                'notifications': {
-                    **self.server_config['notifications'],
-                    'smtp_user': '••••••••••••••',
-                    'smtp_pass': '••••••••',
-                },
-            }
-            self.logger.info(sanitized_config)
+    def load_config(self):
+        config_kwargs = {
+            name: getattr(local_config, name)
+            for name in dir(local_config)
+            if not name.startswith("_")
+        }
+        self.server_config = ServerConfig(
+            debug=self.debug,
+            **config_kwargs
+        )
+        self.logger.info(self.server_config.sanitized_dict())
 
     def init_mixer(self):
         pygame.mixer.init()
-        pygame.mixer.music.load(self.server_config['audio_file'])
+        pygame.mixer.music.load(self.server_config.audio_file)
         pygame.mixer.music.set_volume(0.6)
 
     def init_gpio(self):
@@ -163,7 +146,7 @@ class App:
         else:
             self.logger.debug('Not playing sound because in do-not-disturb-mode.')
         if self._should_send_notification():
-            notifications.send(self.server_config['notifications'])
+            notifications.send(self.server_config.notifications)
         else:
             self.logger.debug('Not sending notifications because volume is too high.')
 
@@ -201,7 +184,7 @@ class App:
             await asyncio.sleep(0.200)
 
     async def start_web_server(self):
-        tornado_server.start(self.server_config['port'], self.message_types)
+        tornado_server.start(self.server_config, self.message_types)
 
     def cleanup(self, sig, frame):
         """
@@ -223,14 +206,10 @@ class App:
     # PRIVATE
 
     def _should_play_sound(self):
-        do_not_disturb_mode = self.server_config['do_not_disturb_mode']
-        now = datetime.now().time()
-        begin = time(*do_not_disturb_mode['begin'])
-        end = time(*do_not_disturb_mode['end'])
-        return not utils.is_time_between(begin, end, now)
+        return not utils.do_not_disturb_now(self.server_config)
 
     def _should_send_notification(self):
         return (
             pygame.mixer.music.get_volume()
-            <= self.server_config['notifications']['max_volume']
+            <= self.server_config.notifications['max_volume']
         )

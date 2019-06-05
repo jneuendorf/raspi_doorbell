@@ -3,8 +3,6 @@ import ReactDom from "react-dom"
 import Switch from "react-switch"
 import Slider from "rc-slider/lib/Slider"
 
-import messageTypes from "../websocket-message-types.json"
-
 
 const Seperator = () => {
     return <div style={{marginTop: 35, marginBottom: 35, borderTop: "1px solid gray"}} />
@@ -32,7 +30,7 @@ class StatusApp extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
-            do_not_disturb: template_context.do_not_disturb_mode_is_on,
+            do_not_disturb: globals.do_not_disturb_mode_is_on,
             volume: -1,
             restart_btn: {
                 label: "Neu starten",
@@ -47,9 +45,9 @@ class StatusApp extends React.Component {
     }
 
     init_websocket() {
-        const websocket = new WebSocket(template_context.websocket_url)
+        const websocket = new WebSocket(globals.websocket_url)
         websocket.onopen = () => {
-            websocket.send(JSON.stringify({type: messageTypes.requestVolume}))
+            websocket.send(JSON.stringify({type: globals.message_types.request_volume}))
         }
         websocket.onmessage = (event) => {
             this.handle_websocket_message(event.data)
@@ -73,10 +71,10 @@ class StatusApp extends React.Component {
         }
         if (message) {
             const {type, ...payload} = message
-            if (type === messageTypes.receiveVolume) {
+            if (type === globals.message_types.receive_volume) {
                 this.setState({volume: payload.volume})
             }
-            /* else if (type === messageTypes.receiveBell) {
+            /* else if (type === globals.message_types.receive_bell) {
                 alert("Ring")
             } */
         }
@@ -127,7 +125,7 @@ class StatusApp extends React.Component {
             <Seperator />
 
             <div style={{maxHeight: 200, overflow: "scroll", }}>
-                {template_context.bell_log.map(entry =>
+                {globals.bell_log.map(entry =>
                     // Because e.g. quotes are escaped in the log.
                     <pre dangerouslySetInnerHTML={{__html: entry}} />
                 )}
@@ -140,7 +138,7 @@ class StatusApp extends React.Component {
         const volume = parseFloat(value)
         this.setState({volume})
         websocket.send(JSON.stringify({
-            type: messageTypes.updateVolume,
+            type: globals.message_types.update_volume,
             volume,
         }))
     }

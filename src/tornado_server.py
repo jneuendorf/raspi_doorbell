@@ -6,15 +6,27 @@ import pygame
 import tornado.web
 import tornado.websocket
 
+import utils
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 connections = set()
 logger = logging.getLogger("doorbell")
-message_types = {}
 
 
+def initialize(self, config, message_types):
+    self.config = config
+    self.message_types = message_types
+
+
+def with_config_and_message_types(cls):
+    cls.initialize = initialize
+    return cls
+
+
+@with_config_and_message_types
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
     def open(self):
@@ -25,19 +37,19 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         message = json.loads(message)
         logger.info('message', message)
         message_type = message['type']
-        if message_type == message_types['request_volume']:
+        if message_type == self.message_types['request_volume']:
             self.write_message({
-                "type": message_types['receive_volume'],
+                "type": self.message_types['receive_volume'],
                 "volume": pygame.mixer.music.get_volume(),
             })
-        elif message_type == message_types['update_volume']:
+        elif message_type == self.message_types['update_volume']:
             new_volume = message['volume']
             logger.info('new volume =', new_volume)
             pygame.mixer.music.set_volume(new_volume)
             for client in connections:
                 if client is not self:
                     client.write_message({
-                        "type": message_types['receive_volume'],
+                        "type": self.message_types['receive_volume'],
                         "volume": new_volume,
                     })
 
@@ -49,19 +61,27 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         super().write_message(json.dumps(message))
 
 
+@with_config_and_message_types
 class StatusHandler(tornado.web.RequestHandler):
     def get(self):
-        self.render(
-            os.path.join(BASE_DIR, "template/status2.html"),
-            # template context
+        template_context = dict(
+            message_types=self.message_types,
             bell_log=self._get_logs(),
-            do_not_disturb_mode_is_on=False,
-            pid_file_exists=True,
-            # TODO: localhost <=> debug
-            # websocket_url="ws://192.168.2.169:8888/websocket",
-            websocket_url="ws://localhost:8888/websocket",
+            do_not_disturb_mode_is_on=utils.do_not_disturb_now(self.config),
+            websocket_url=(
+                "ws://{host}:{port}/websocket".format(
+                    host=self.config.host,
+                    port=self.config.port,
+                )
+            ),
+        )
+        self.render(
+            os.path.join(BASE_DIR, "template/status.html"),
+            **template_context,
         )
 
+    # TODO: Make this efficient for large log files!
+    #       See https://stackoverflow.com/questions/7167008/
     def _get_logs(self, limit=40):
         try:
             with open(os.path.join(BASE_DIR, "app.log")) as file:
@@ -71,16 +91,18 @@ class StatusHandler(tornado.web.RequestHandler):
         return reversed(lines[:-limit])
 
 
-def start(port, _message_types):
-    global message_types
-    message_types = _message_types
+def start(config, message_types):
+    initialization_kwargs = dict(
+        config=config,
+        message_types=message_types,
+    )
     app = tornado.web.Application(
         [
-            (r"/status", StatusHandler),
-            (r"/websocket", WebSocketHandler),
+            (r"/status", StatusHandler, initialization_kwargs),
+            (r"/websocket", WebSocketHandler, initialization_kwargs),
         ],
         static_path=os.path.join(BASE_DIR, 'static'),
         static_url_prefix='/static/',
     )
-    app.listen(port)
-    print(app, port, message_types)
+    app.listen(config.port)
+    print(app, config.port, message_types)

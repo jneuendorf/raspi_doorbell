@@ -1,7 +1,6 @@
 __pycache__
 .cache
 *.log
-# !node_modules/react
 node_modules/*
-server-config.json
+local_config.py
 venv

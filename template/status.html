@@ -4,137 +4,25 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Raspi Doorbell</title>
-    <link rel="stylesheet" href="/static/vendor/bootstrap.min.css">
-    <link rel="stylesheet" href="/static/vendor/bootstrap-toggle.min.css">
-    <script src="/static/vendor/jquery-3.4.1.min.js" charset="utf-8"></script>
-    <script src="/static/vendor/bootstrap-toggle.min.js" charset="utf-8"></script>
-    <style type="text/css">
-        .slider {
-            -webkit-appearance: none;
-            width: 100%;
-            max-width: 500px;
-            height: 15px;
-            border-radius: 5px;
-            background: #d3d3d3;
-            outline: none;
-            margin: 10px 0;
+    <script type="text/javascript">
+        const globals = {
+            message_types: { {% for key, value in message_types.items() %}
+                {{key}}: "{{value}}",
+            {% end %} },
+            bell_log: [{% for entry in bell_log %}
+                "{{entry.strip()}}",
+            {% end %}],
+            do_not_disturb_mode_is_on: {{"true" if do_not_disturb_mode_is_on else "false"}},
+            websocket_url: "{{websocket_url}}",
         }
-
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
-            background: #4CAF50;
-            cursor: pointer;
-        }
-
-        .slider::-moz-range-thumb {
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
-            background: #4CAF50;
-            cursor: pointer;
-        }
-    </style>
+    </script>
+    <link rel="stylesheet" href="/static/vendor/rc-slider.css">
+    <link rel="stylesheet" href="/static/bootstrap-button.css">
 </head>
 <body>
 
+<div class="mount-point"></div>
 
-
-<script type="text/javascript">
-    let volume, websocket, slider
-
-    const messageTypes = {
-        "request_volume": "volume:request",
-        "requestVolume": "volume:request",
-        "receive_volume": "volume:receive",
-        "receiveVolume": "volume:receive",
-        "update_volume": "volume:update",
-        "updateVolume": "volume:update",
-
-        "receive_bell": "bell:receive",
-        "receiveBell": "bell:receive"
-    }
-
-
-    const handleMessage = message => {
-        try {
-            message = JSON.parse(message)
-        }
-        catch (error) {
-            console.log('received invalid message', message)
-            message = null
-        }
-        if (message) {
-            const {type, ...payload} = message
-            if (type === messageTypes.receiveVolume) {
-                volume = payload.volume
-                slider.value = volume
-            }
-            /* else if (type === messageTypes.receiveBell) {
-                alert('Ring')
-            } */
-        }
-    }
-
-    websocket = new WebSocket('ws://192.168.2.169:8888/websocket')
-    websocket.onopen = () => {
-        websocket.send(JSON.stringify({type: messageTypes.requestVolume}))
-    }
-    websocket.onmessage = (event) => {
-        handleMessage(event.data)
-    }
-    websocket.onerror = (error) => {
-        console.error(error)
-    }
-    websocket.onclose = (event) => {
-        console.log(event.code, event.reason)
-    }
-</script>
-
-<div style="margin: 0 auto;">
-    <span>Volume</span><br>
-    <input
-        class="slider"
-        type="range"
-        min="0"
-        max="1"
-        step="any"
-        value="{{volume}}"
-    >
-</div>
-
-
-<!-- bootstrap-toggle -->
-<div class="checkbox disabled">
-    <label>
-        <input
-            type="checkbox"
-            data-toggle="toggle"
-            disabled
-            {% if do_not_disturb_mode_is_on %}
-                checked
-            {% end %}
-        >
-        Nicht stören
-    </label>
-</div>
-
-<script src="/static/status.js" type="module"></script>
-
-<script type="text/javascript">
-    slider = document.querySelector('.slider')
-    slider.addEventListener('change', event => {
-        websocket.send(JSON.stringify({
-            type: messageTypes.updateVolume,
-            volume: parseFloat(event.target.value),
-        }))
-    })
-</script>
-
-<button type="button">Neu starten</button>
-
+<script src="/static/dist/status.js"></script>
 </body>
 </html>
