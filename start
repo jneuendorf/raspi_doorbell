@@ -4,7 +4,6 @@
 
 # echo $(python --version)
 
-nohup python app.py > stdout.log 2>&1 &
-# # nohup bash -c '. venv/bin/activate && python app.py' > server.log 2>&1 &
+nohup python src/main.py > stdout.log 2>&1 &
 echo $! > doorbell.pid
 echo $(cat doorbell.pid)
