@@ -68,12 +68,7 @@ class StatusHandler(tornado.web.RequestHandler):
             message_types=self.message_types,
             bell_log=self._get_logs(),
             do_not_disturb_mode_is_on=utils.do_not_disturb_now(self.config),
-            websocket_url=(
-                "ws://{host}:{port}/websocket".format(
-                    host=self.config.host,
-                    port=self.config.port,
-                )
-            ),
+            websocket_url="/websocket",
         )
         self.render(
             os.path.join(BASE_DIR, "template/status.html"),
@@ -83,12 +78,13 @@ class StatusHandler(tornado.web.RequestHandler):
     # TODO: Make this efficient for large log files!
     #       See https://stackoverflow.com/questions/7167008/
     def _get_logs(self, limit=40):
-        try:
-            with open(os.path.join(BASE_DIR, "app.log")) as file:
-                lines = file.readlines()
-        except OSError:
-            lines = []
-        return reversed(lines[:-limit])
+        return []
+        # try:
+        #     with open(os.path.join(BASE_DIR, "app.log")) as file:
+        #         lines = file.readlines()
+        # except OSError:
+        #     lines = []
+        # return reversed(lines[:-limit])
 
 
 def start(config, message_types):

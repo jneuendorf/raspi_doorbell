@@ -45,7 +45,7 @@ class StatusApp extends React.Component {
     }
 
     init_websocket() {
-        const websocket = new WebSocket(globals.websocket_url)
+        const websocket = new WebSocket(`ws://${location.host}${globals.websocket_url}`)
         websocket.onopen = () => {
             websocket.send(JSON.stringify({type: globals.message_types.request_volume}))
         }
@@ -111,7 +111,7 @@ class StatusApp extends React.Component {
                 />
             </div>
 
-            <Seperator />
+            {/* <Seperator />
 
             <button
                 type="button"
@@ -120,7 +120,7 @@ class StatusApp extends React.Component {
                 disabled={this.state.restart_btn.disabled}
             >
                 {this.state.restart_btn.label}
-            </button>
+            </button> */}
 
             <Seperator />
 
