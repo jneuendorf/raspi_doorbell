@@ -1,4 +1,3 @@
-host = "192.168.2.169"
 port = 8888
 
 notifications = {

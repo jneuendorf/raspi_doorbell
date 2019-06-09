@@ -26,7 +26,7 @@ const styles = {
 }
 
 
-class StatusApp extends React.Component {
+class App extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
@@ -41,6 +41,7 @@ class StatusApp extends React.Component {
         this.init_websocket()
 
         this.restart_server = this.restart_server.bind(this)
+        this.change_volume_state = this.change_volume_state.bind(this)
         this.change_volume = this.change_volume.bind(this)
     }
 
@@ -58,6 +59,7 @@ class StatusApp extends React.Component {
         websocket.onclose = (event) => {
             console.log(event.code, event.reason)
         }
+        this.websocket = websocket
     }
 
     handle_websocket_message(raw_message) {
@@ -100,6 +102,7 @@ class StatusApp extends React.Component {
                     max={1}
                     step={0.01}
                     value={volume}
+                    onChange={this.change_volume_state}
                     onAfterChange={this.change_volume}
                     handleStyle={
                         volume >= 0
@@ -134,10 +137,15 @@ class StatusApp extends React.Component {
         </div>
     }
 
+    change_volume_state(value) {
+        const volume = parseFloat(value)
+        this.setState({volume})
+    }
+
     change_volume(value) {
         const volume = parseFloat(value)
         this.setState({volume})
-        websocket.send(JSON.stringify({
+        this.websocket.send(JSON.stringify({
             type: globals.message_types.update_volume,
             volume,
         }))
@@ -154,7 +162,4 @@ class StatusApp extends React.Component {
 }
 
 
-ReactDom.render(
-    <StatusApp />,
-    document.querySelector(".mount-point")
-)
+ReactDom.render(<App />, document.querySelector(".mount-point"))

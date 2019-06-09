@@ -43,69 +43,40 @@ class App:
         self.init_gpio()
 
     def init_logger(self):
-        # TODO: Use dict config: logging.config.dictConfig()
-        # logging.config.dictConfig({
-        #     "version": 1,
-        #     "disable_existing_loggers": True,
-        #     "formatters": {
-        #         "console": {
-        #             "format": "\033[1;31m%(levelname)s\033[1;0m %(asctime)s %(module)s %(process)d %(thread)d %(message)s"
-        #         },
-        #         "verbose": {
-        #             "format": "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s"
-        #         },
-        #         "simple": {
-        #             "format": "%(levelname)s %(message)s"
-        #         },
-        #     },
-        #     "handlers": {
-        #         "console": {
-        #             "class": "logging.StreamHandler",
-        #             "formatter": "console",
-        #         },
-        #         "slack_info": {
-        #             "()": SlackHandler,
-        #             "webhook_urls": [
-        #                 "https://hooks.slack.com/services/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",
-        #             ],
-        #             "formatter": "simple",
-        #             "level": "INFO",
-        #         },
-        #         "slack_warning": {
-        #             "()": SlackHandler,
-        #             "webhook_urls": [
-        #                 "https://hooks.slack.com/services/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",
-        #             ],
-        #             "formatter": "simple",
-        #             "level": "WARNING",
-        #         },
-        #     },
-        #     "loggers": {
-        #         "__main__": {
-        #             "handlers": ["console", "slack"],
-        #             "level": "DEBUG",
-        #             "propagate": True,
-        #         },
-        #         # "slack": {
-        #         #     "handlers": ["slack"],
-        #         #     "level": "INFO",
-        #         #     "propagate": True,
-        #         # },
-        #     },
-        # })
-        logger = logging.getLogger('doorbell')
-
-        logger.setLevel(logging.DEBUG)
-        # create file handler which logs even debug messages
-        file_handler = logging.FileHandler('app.log')
-        file_handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter(
-            '[%(asctime)s,%(msecs)d] %(levelname)s %(message)s'
-        )
-        file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
-
-        self.logger = logger
+        logging.config.dictConfig({
+            "version": 1,
+            "disable_existing_loggers": True,
+            "formatters": {
+                "console": {
+                    "format": "\033[1;31m%(levelname)s\033[1;0m %(asctime)s %(module)s %(process)d %(thread)d %(message)s"
+                },
+                "verbose": {
+                    "format": "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s"
+                },
+                "simple": {
+                    "format": "%(levelname)s %(message)s"
+                },
+            },
+            "handlers": {
+                "console": {
+                    "class": "logging.StreamHandler",
+                    "formatter": "console",
+                },
+                "file": {
+                    "class": "logging.FileHandler",
+                    "filename": "app.log",
+                    "formatter": "verbose",
+                },
+            },
+            "loggers": {
+                "": {
+                    "handlers": ["console", "file"],
+                    "level": "DEBUG",
+                    "propagate": True,
+                },
+            },
+        })
+        self.logger = logging.getLogger('doorbell')
 
     def load_config(self):
         config_kwargs = {

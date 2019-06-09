@@ -35,16 +35,20 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
     def on_message(self, message):
         message = json.loads(message)
-        logger.info('message', message)
-        message_type = message['type']
-        if message_type == self.message_types['request_volume']:
+        logger.info("message", message)
+        message_type = message["type"]
+        if message_type == self.message_types["request_volume"]:
             self.write_message({
-                "type": self.message_types['receive_volume'],
+                "type": self.message_types["receive_volume"],
                 "volume": pygame.mixer.music.get_volume(),
             })
-        elif message_type == self.message_types['update_volume']:
-            new_volume = message['volume']
-            logger.info('new volume =', new_volume)
+        elif message_type == self.message_types["update_volume"]:
+            new_volume = message["volume"]
+            logger.info(
+                "new volume =",
+                new_volume,
+                "({})".format(str(type(new_volume)))
+            )
             pygame.mixer.music.set_volume(new_volume)
             for client in connections:
                 if client is not self:
@@ -87,6 +91,24 @@ class StatusHandler(tornado.web.RequestHandler):
         # return reversed(lines[:-limit])
 
 
+class TodosHandler(tornado.web.RequestHandler):
+    todos_filepath = os.path.join(BASE_DIR, "todos.json")
+
+    def get(self):
+        with open(self.todos_filepath) as file:
+            todos = json.load(file)
+        template_context = dict(todos=todos)
+        self.render(
+            os.path.join(BASE_DIR, "template/todos.html"),
+            **template_context,
+        )
+
+    def post(self):
+        todos = json.loads(self.request.body.decode('utf-8'))
+        with open(self.todos_filepath, "w") as file:
+            json.dump(todos, file)
+
+
 def start(config, message_types):
     initialization_kwargs = dict(
         config=config,
@@ -95,6 +117,7 @@ def start(config, message_types):
     app = tornado.web.Application(
         [
             (r"/status", StatusHandler, initialization_kwargs),
+            (r"/todos", TodosHandler),
             (r"/websocket", WebSocketHandler, initialization_kwargs),
         ],
         static_path=os.path.join(BASE_DIR, 'static'),
