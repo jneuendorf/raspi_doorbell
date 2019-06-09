@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Raspi Doorbell</title>
+    <script type="text/javascript">
+        const globals = {
+            todos: [{% for todo in todos %}
+                "{{todo.strip()}}",
+            {% end %}],
+        }
+    </script>
+    <link rel="stylesheet" href="/static/todos.css">
+    <link rel="stylesheet" href="/static/vendor/bootstrap-button.css">
+</head>
+<body>
+
+<div class="mount-point"></div>
+
+<script src="/static/dist/todos.js"></script>
+</body>
+</html>
