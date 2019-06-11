@@ -10,20 +10,68 @@ import utils
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+USER_COOKIE_NAME = "user"
 
 
 connections = set()
 logger = logging.getLogger("doorbell")
 
 
-def initialize(self, config, message_types):
+def _initialize(self, config, message_types):
     self.config = config
     self.message_types = message_types
 
 
+def _get_current_user(self):
+    return self.get_secure_cookie(USER_COOKIE_NAME)
+
+
 def with_config_and_message_types(cls):
-    cls.initialize = initialize
+    cls.initialize = _initialize
     return cls
+
+
+def login_required(methods=("get")):
+    def decorator(cls):
+        cls.get_current_user = _get_current_user
+        for method_name in methods:
+            method = getattr(cls, method_name)
+            setattr(cls, method_name, tornado.web.authenticated(method))
+        return cls
+    return decorator
+
+
+@with_config_and_message_types
+class LoginHandler(tornado.web.RequestHandler):
+    def get(self):
+        template_context = dict(
+            next_url=self.get_argument("next", default="/status"),
+        )
+        self.render(
+            os.path.join(BASE_DIR, "template/login.html"),
+            **template_context,
+        )
+
+    def post(self):
+        password_ok = False
+        try:
+            password_ok = utils.verify_password(
+                self.config.password_hash,
+                self.get_argument("password")
+            )
+            if password_ok:
+                self.set_secure_cookie(
+                    USER_COOKIE_NAME,
+                    self.get_argument("username")
+                )
+        except utils.VerificationError:
+            pass
+
+        if password_ok:
+            next_url = self.get_argument("next_url")
+            self.redirect(next_url)
+        else:
+            self.get()
 
 
 @with_config_and_message_types
@@ -65,6 +113,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         super().write_message(json.dumps(message))
 
 
+@login_required(["get"])
 @with_config_and_message_types
 class StatusHandler(tornado.web.RequestHandler):
     def get(self):
@@ -82,21 +131,22 @@ class StatusHandler(tornado.web.RequestHandler):
     # TODO: Make this efficient for large log files!
     #       See https://stackoverflow.com/questions/7167008/
     def _get_logs(self, limit=40):
-        return []
         # try:
         #     with open(os.path.join(BASE_DIR, "app.log")) as file:
         #         lines = file.readlines()
         # except OSError:
         #     lines = []
         # return reversed(lines[:-limit])
+        return []
 
 
+@login_required(["get"])
 class TodosHandler(tornado.web.RequestHandler):
     todos_filepath = os.path.join(BASE_DIR, "todos.json")
 
     def get(self):
         with open(self.todos_filepath) as file:
-            todos = json.load(file)
+            todos = file.read()
         template_context = dict(todos=todos)
         self.render(
             os.path.join(BASE_DIR, "template/todos.html"),
@@ -116,12 +166,16 @@ def start(config, message_types):
     )
     app = tornado.web.Application(
         [
+            (r"/login", LoginHandler, initialization_kwargs),
             (r"/status", StatusHandler, initialization_kwargs),
             (r"/todos", TodosHandler),
             (r"/websocket", WebSocketHandler, initialization_kwargs),
         ],
         static_path=os.path.join(BASE_DIR, 'static'),
         static_url_prefix='/static/',
+        login_url="/login",
+        # https://www.grc.com/passwords.htm
+        cookie_secret=config.cookie_secret,  # NOQA
     )
     app.listen(config.port)
     print(app, config.port, message_types)

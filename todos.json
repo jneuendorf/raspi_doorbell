@@ -1,1 +1,1 @@
-["item2", "item1", "asdf"]
+[{"value": "item2", "author": "Me", "date": "12.04.2011"}, {"value": "item1", "author": "You", "date": "31.03.2017"}, {"value": "asdf", "author": "Someone", "date": "03.05.2019"}]

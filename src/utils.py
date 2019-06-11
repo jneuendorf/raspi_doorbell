@@ -1,5 +1,10 @@
 from datetime import datetime, time
 
+from argon2 import PasswordHasher, exceptions
+
+
+password_hasher = PasswordHasher()
+
 
 def is_time_between(begin_time, end_time, check_time):
     """
@@ -18,3 +23,14 @@ def do_not_disturb_now(server_config):
     begin = time(*do_not_disturb['begin'])
     end = time(*do_not_disturb['end'])
     return is_time_between(begin, end, now)
+
+
+def hash_password(password):
+    return password_hasher.hash(password)
+
+
+def verify_password(hash, password):
+    return password_hasher.verify(hash, password)
+
+
+VerificationError = exceptions.VerificationError

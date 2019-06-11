@@ -45,7 +45,7 @@ class App:
     def init_logger(self):
         logging.config.dictConfig({
             "version": 1,
-            "disable_existing_loggers": True,
+            "disable_existing_loggers": not self.debug,
             "formatters": {
                 "console": {
                     "format": "\033[1;31m%(levelname)s\033[1;0m %(asctime)s %(module)s %(process)d %(thread)d %(message)s"

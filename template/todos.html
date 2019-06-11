@@ -6,9 +6,8 @@
     <title>Raspi Doorbell</title>
     <script type="text/javascript">
         const globals = {
-            todos: [{% for todo in todos %}
-                "{{todo.strip()}}",
-            {% end %}],
+            todos: {% raw todos %},
+            current_user: "{{current_user}}",
         }
     </script>
     <link rel="stylesheet" href="/static/todos.css">

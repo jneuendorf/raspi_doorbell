@@ -6,17 +6,22 @@ import array_move from "array-move"
 
 const DragHandle = sortableHandle(() => <div className="Showcase__style__handle" />)
 
-const SortableItem = sortableElement(({value, index, delete_item}) => <div
+const SortableItem = sortableElement(({value, meta, index, delete_item}) => <div
     className="Showcase__style__item Showcase__style__stylizedItem"
     style={{height: 59}}
 >
-    <DragHandle/> {value}
+    <DragHandle/>
+    {value}
+    &nbsp;
+    <span style={{color: "gray", fontSize: 12}}>
+        ({meta})
+    </span>
     <button
         className="btn btn-danger"
         style={{
             fontSize: 30,
             height: 48,
-            paddingTop: 4,
+            paddingTop: 0,
             position: "absolute",
             right: 4,
             textAlign: "center",
@@ -61,7 +66,11 @@ class App extends Component {
         const value = prompt("Neues Todo")
         if (value) {
             const {todos} = this.state
-            this.setState({todos: todos.concat([value])})
+            this.setState({todos: todos.concat([{
+                value,
+                author: globals.current_user,
+                date: (new Date()).toLocaleDateString('de-DE')
+            }])})
         }
     }
 
@@ -109,10 +118,11 @@ class App extends Component {
                     itemClass="Showcase__style__item Showcase__style__stylizedItem"
                 >
                     {
-                        todos.map((value, index) => <SortableItem
+                        todos.map(({value, author, date}, index) => <SortableItem
                             key={`item-${index}`}
                             index={index}
                             value={value}
+                            meta={`${author}, ${date}`}
                             delete_item={this.delete_item}
                         />)
                     }

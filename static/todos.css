@@ -600,8 +600,8 @@ body,html {
 }
 
 .Showcase__style__list {
-    width: 400px;
-    height: 500px;
+    width: 600px;
+    height: 600px;
     overflow: auto;
     -webkit-overflow-scrolling: touch;
     border: 1px solid #999

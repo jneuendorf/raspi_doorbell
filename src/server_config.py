@@ -9,10 +9,17 @@ class ServerConfig:
     }
     audio_file = "DBSE.ogg"
 
+    cookie_secret = None
+    password_hash = None
+
     def __init__(self, *,
-                 debug,
+                 debug, cookie_secret, password_hash,
                  port=None, do_not_disturb=None, audio_file=None,
                  notifications=None):
+        self.debug = debug
+        self.cookie_secret = cookie_secret
+        self.password_hash = password_hash
+
         if port is not None:
             self.port = port
         if do_not_disturb is not None:
@@ -29,6 +36,9 @@ class ServerConfig:
 
     def sanitized_dict(self):
         return {
+            "debug": self.debug,
+            "cookie_secret": "••••••••••••••••••••••••••••••••••••••••••••••••",
+            "password_hash": self.password_hash,
             "port": self.port,
             "do_not_disturb": self.do_not_disturb,
             "audio_file": self.audio_file,

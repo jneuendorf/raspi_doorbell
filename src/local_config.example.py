@@ -1,3 +1,7 @@
+cookie_secret = "some really secure string"
+# Generate as described here: https://github.com/hynek/argon2-cffi
+password_hash = "$argon2id$v=19$m=102400,t=2,p=8$tSm+JOWigOgPZx/g44K5fQ$WDyus6py50bVFIPkjA28lQ"  # NOQA
+
 port = 8888
 
 notifications = {
