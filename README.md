@@ -9,8 +9,8 @@ message whenever the bell is rung.
 
 ## Commands
 
-`npx parcel watch --out-dir static/dist static/status.js`
-`npx parcel build --out-dir static/dist static/status.js`
+`npx parcel watch --out-dir static/dist static/*.js`
+`npx parcel build --out-dir static/dist static/*.js`
 
 `python3 src/main.py --debug`
 
