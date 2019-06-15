@@ -19,13 +19,14 @@ const SortableItem = sortableElement(({value, meta, index, delete_item}) => <div
     <button
         className="btn btn-danger"
         style={{
-            fontSize: 30,
-            height: 48,
+            fontSize: 26,
+            height: 40,
+            lineHeight: "34px",
             paddingTop: 0,
             position: "absolute",
             right: 4,
             textAlign: "center",
-            width: 48,
+            width: 40,
         }}
         onClick={() => delete_item(index)}
     >

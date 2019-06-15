@@ -1,28 +1,20 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Raspi Doorbell</title>
-    <script type="text/javascript">
-        const globals = {
-            message_types: { {% for key, value in message_types.items() %}
-                {{key}}: "{{value}}",
-            {% end %} },
-            bell_log: [{% for entry in bell_log %}
-                "{{entry.strip()}}",
-            {% end %}],
-            do_not_disturb_mode_is_on: {{"true" if do_not_disturb_mode_is_on else "false"}},
-            websocket_url: "{{websocket_url}}",
-        }
-    </script>
+{% extends "base.html" %}
+
+{% block js_globals %}
+{
+    message_types: { {% for key, value in message_types.items() %}
+        {{key}}: "{{value}}",
+    {% end %} },
+    bell_log: [{% for entry in bell_log %}
+        "{{entry.strip()}}",
+    {% end %}],
+    do_not_disturb_mode_is_on: {{"true" if do_not_disturb_mode_is_on else "false"}},
+    websocket_url: "{{websocket_url}}",
+}
+{% end %}
+
+{% block header_includes %}
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/{{ page_name }}.css">
     <link rel="stylesheet" href="/static/vendor/rc-slider.css">
-    <link rel="stylesheet" href="/static/vendor/bootstrap-button.css">
-</head>
-<body>
-
-<div class="mount-point"></div>
-
-<script src="/static/dist/status.js"></script>
-</body>
-</html>
+{% end %}

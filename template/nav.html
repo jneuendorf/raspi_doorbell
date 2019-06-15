@@ -1,0 +1,11 @@
+<nav class="nav nav-pills nav-justified mb-5">
+    {% for url, label, active in routes %}
+        <a
+            class="nav-item nav-link {% if active %}active{% end %}"
+            href="{{ url }}"
+            style="font-variant: small-caps"
+        >
+            {{ label }}
+        </a>
+    {% end %}
+</nav>

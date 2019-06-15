@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{{ title }}{% end %}</title>
+    <script type="text/javascript">
+        const globals = {% block js_globals %}{}{% end %}
+    </script>
+    {% block header_includes %}
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link rel="stylesheet" href="/static/{{ page_name }}.css">
+    {% end %}
+</head>
+
+<body style="padding: 5px">
+
+{% block body %}
+    <div class="container">
+        {% include "nav.html" %}
+        {% block content %}
+            <div class="mount-point"></div>
+            <script src="/static/dist/{{ page_name }}.js"></script>
+        {% end %}
+    </div>
+{% end %}
+
+</body>
+</html>

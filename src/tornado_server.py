@@ -32,23 +32,54 @@ def with_config_and_message_types(cls):
 
 
 def login_required(methods=("get")):
+    """
+    'None' may be passed.
+    """
+
     def decorator(cls):
         cls.get_current_user = _get_current_user
-        for method_name in methods:
-            method = getattr(cls, method_name)
-            setattr(cls, method_name, tornado.web.authenticated(method))
+        if methods:
+            for method_name in methods:
+                method = getattr(cls, method_name)
+                setattr(cls, method_name, tornado.web.authenticated(method))
         return cls
     return decorator
 
 
+class RequestHandler(tornado.web.RequestHandler):
+    def get_template_context(self, additionals=None):
+        if additionals is None:
+            additionals = {}
+
+        handler_name = self.__class__.__name__.replace("Handler", "")
+        page_name = handler_name.lower()
+        defaults = {
+            "page_name": page_name,
+            "title": handler_name,
+            "routes": [
+                # Set active to True if ~ handler matches url
+                (url, label, url[1:] == page_name)
+                for url, label in [
+                    ("/login", "Login"),
+                    ("/status", "Klingel"),
+                    ("/todos", "Todos"),
+                    ("/logout", "Logout"),
+                ]
+            ],
+        }
+        return {**defaults, **additionals}
+
+
+# Have 'current_user' set because get_current_user is implemented.
+@login_required(None)
 @with_config_and_message_types
-class LoginHandler(tornado.web.RequestHandler):
+class LoginHandler(RequestHandler):
     def get(self):
-        template_context = dict(
-            next_url=self.get_argument("next", default="/status"),
-        )
+        template_context = self.get_template_context(dict(
+            next_url=self.get_argument("next", default="/"),
+        ))
         self.render(
-            os.path.join(BASE_DIR, "template/login.html"),
+            "login.html",
             **template_context,
         )
 
@@ -72,6 +103,13 @@ class LoginHandler(tornado.web.RequestHandler):
             self.redirect(next_url)
         else:
             self.get()
+
+
+@login_required(["get"])
+class LogoutHandler(RequestHandler):
+    def get(self):
+        self.clear_cookie(USER_COOKIE_NAME)
+        self.redirect("/login")
 
 
 @with_config_and_message_types
@@ -115,16 +153,16 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
 @login_required(["get"])
 @with_config_and_message_types
-class StatusHandler(tornado.web.RequestHandler):
+class StatusHandler(RequestHandler):
     def get(self):
-        template_context = dict(
+        template_context = self.get_template_context(dict(
             message_types=self.message_types,
             bell_log=self._get_logs(),
             do_not_disturb_mode_is_on=utils.do_not_disturb_now(self.config),
             websocket_url="/websocket",
-        )
+        ))
         self.render(
-            os.path.join(BASE_DIR, "template/status.html"),
+            "status.html",
             **template_context,
         )
 
@@ -141,15 +179,15 @@ class StatusHandler(tornado.web.RequestHandler):
 
 
 @login_required(["get"])
-class TodosHandler(tornado.web.RequestHandler):
+class TodosHandler(RequestHandler):
     todos_filepath = os.path.join(BASE_DIR, "todos.json")
 
     def get(self):
         with open(self.todos_filepath) as file:
             todos = file.read()
-        template_context = dict(todos=todos)
+        template_context = self.get_template_context(dict(todos=todos))
         self.render(
-            os.path.join(BASE_DIR, "template/todos.html"),
+            "todos.html",
             **template_context,
         )
 
@@ -166,13 +204,16 @@ def start(config, message_types):
     )
     app = tornado.web.Application(
         [
+            (r"/", LoginHandler, initialization_kwargs),
             (r"/login", LoginHandler, initialization_kwargs),
+            (r"/logout", LogoutHandler),
             (r"/status", StatusHandler, initialization_kwargs),
             (r"/todos", TodosHandler),
             (r"/websocket", WebSocketHandler, initialization_kwargs),
         ],
-        static_path=os.path.join(BASE_DIR, 'static'),
-        static_url_prefix='/static/',
+        static_path=os.path.join(BASE_DIR, "static"),
+        static_url_prefix="/static/",
+        template_path=os.path.join(BASE_DIR, "template"),
         login_url="/login",
         # https://www.grc.com/passwords.htm
         cookie_secret=config.cookie_secret,  # NOQA

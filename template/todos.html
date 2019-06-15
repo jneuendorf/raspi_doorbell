@@ -1,22 +1,8 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Raspi Doorbell</title>
-    <script type="text/javascript">
-        const globals = {
-            todos: {% raw todos %},
-            current_user: "{{current_user}}",
-        }
-    </script>
-    <link rel="stylesheet" href="/static/todos.css">
-    <link rel="stylesheet" href="/static/vendor/bootstrap-button.css">
-</head>
-<body>
+{% extends "base.html" %}
 
-<div class="mount-point"></div>
-
-<script src="/static/dist/todos.js"></script>
-</body>
-</html>
+{% block js_globals %}
+{
+    todos: {% raw todos %},
+    current_user: "{{ current_user }}",
+}
+{% end %}
